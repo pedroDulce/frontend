@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { QaApiService, RankingDTO } from '../../services/qa-api.service';
 
 @Component({
   selector: 'app-ranking',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './ranking.component.html',
   styleUrls: ['./ranking.component.css']
 })

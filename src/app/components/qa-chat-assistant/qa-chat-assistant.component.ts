@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { QaApiService, ChatResponse, SourceDTO } from '../../services/qa-api.service';
 
 interface QAMessage {
@@ -13,8 +11,6 @@ interface QAMessage {
 
 @Component({
   selector: 'app-qa-chat-assistant',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: './qa-chat-assistant.component.html',
   styleUrls: ['./qa-chat-assistant.component.css']
 })

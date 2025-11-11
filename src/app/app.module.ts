@@ -1,23 +1,23 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RankingComponent } from './components/ranking/ranking.component';
+import { FormsModule } from '@angular/forms';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+
 import { QaChatAssistantComponent } from './components/qa-chat-assistant/qa-chat-assistant.component';
+import { RankingComponent } from './components/ranking/ranking.component';
 
 @NgModule({
-  declarations: [
-  ],
+  declarations: [],
   imports: [
     BrowserModule,
     CommonModule,
-    HttpClientModule,
     FormsModule,
-    RankingComponent, 
-    QaChatAssistantComponent 
+    QaChatAssistantComponent,
+    RankingComponent
   ],
-  providers: [],
-  bootstrap: []
+  providers: [
+    provideHttpClient(withInterceptorsFromDi())
+  ]
 })
 export class AppModule { }
