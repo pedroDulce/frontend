@@ -32,6 +32,7 @@ export class QaChatAssistantComponent implements OnInit {
     this.checkBackendConnection();
   }
 
+
   toggleChat() {
     this.isCollapsed = !this.isCollapsed;
   }

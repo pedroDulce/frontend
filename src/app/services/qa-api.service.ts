@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of, tap } from 'rxjs';
 
 // Interfaces para las fuentes de información
 export interface SourceDTO {
@@ -21,19 +21,14 @@ export interface ChatResponse {
   sources?: SourceDTO[];
 }
 
-export interface Aplicacion {
-  id?: number;
-  nombre?: string;
-  descripcion?: string;
-  equipoResponsable?: string;
-  estado?: string;
-  fechaCreacion?: Date;
-  elementosPromocionables?: any[];
-}
 
 export interface RankingDTO {
-  aplicacion: Aplicacion;
-  cobertura: number;
+  nombre?: string;        // ← debe coincidir con el JSON
+  descripcion?: string;
+  equipoResponsable?: string; 
+  estado?: string;
+  fechaCreacion?: Date; 
+  cobertura: number;   
 }
 
 @Injectable({
@@ -53,6 +48,20 @@ export class QaApiService {
   // Endpoint de ranking
   getRanking(): Observable<RankingDTO[]> {
     return this.http.get<RankingDTO[]>(`${this.baseUrl}/ranking`);
+  }
+
+  // En tu servicio del frontend (qa-chat-assistant.service.ts)
+  getRankingData(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/ranking`).pipe(
+      tap((response: any) => {
+        console.log('📊 Respuesta del ranking:', response);
+        // Verifica que los datos tengan la estructura correcta
+      }),
+      catchError(error => {
+        console.error('❌ Error fetching ranking:', error);
+        return of(null);
+      })
+    );
   }
 
   // Verificar salud del backend

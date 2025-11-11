@@ -25,6 +25,7 @@ export class RankingComponent implements OnInit {
     this.qaApi.getRanking().subscribe({
       next: (data) => {
         this.ranking = data;
+        console.log("datos: ", data)
         this.loading = false;
         console.log('Ranking cargado:', data); // ← Para debug
       },
@@ -35,9 +36,9 @@ export class RankingComponent implements OnInit {
         
         // Datos de prueba si el backend falla
         this.ranking = [
-          { aplicacion: { nombre: 'App Web', descripcion: 'Aplicación principal' }, cobertura: 85.5 },
-          { aplicacion: { nombre: 'API Users', descripcion: 'Microservicio usuarios' }, cobertura: 72.3 },
-          { aplicacion: { nombre: 'Mobile App', descripcion: 'App móvil' }, cobertura: 63.8 }
+          { nombre: 'App Web', descripcion: 'Aplicación principal' , cobertura: 85.5 },
+          { nombre: 'API Users', descripcion: 'Microservicio usuarios' , cobertura: 72.3 },
+          { nombre: 'Mobile App', descripcion: 'App móvil' , cobertura: 63.8 }
         ];
         this.loading = false;
       }
