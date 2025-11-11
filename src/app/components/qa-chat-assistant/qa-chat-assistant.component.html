@@ -8,30 +8,80 @@
 
   <div class="chat-content" *ngIf="!isCollapsed">
     <div class="messages-container">
-      <div *ngFor="let msg of messages" class="message" [class.user-message]="msg.type === 'user'">
-        <div class="message-text">{{ msg.text }}</div>
+      <div *ngFor="let msg of messages; trackBy: trackByFn" 
+           class="message" 
+           [class.user-message]="msg.type === 'user'"
+           [class.assistant-message]="msg.type === 'assistant'">
         
-        <!-- Sugerencias -->
-        <div *ngIf="msg.suggestions && msg.type === 'assistant'" class="suggestions">
-          <button *ngFor="let suggestion of msg.suggestions" 
-                  class="suggestion-btn"
-                  (click)="useSuggestion(suggestion)">
-            {{ suggestion }}
-          </button>
+        <div class="message-avatar">
+          {{ msg.type === 'user' ? '👤' : '🤖' }}
         </div>
+        
+        <div class="message-content">
+          <!-- Texto del mensaje -->
+          <div class="message-text">{{ msg.text }}</div>
+          
+          <!-- Timestamp -->
+          <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+          
+          <!-- AQUÍ VAN LAS SUGERENCIAS -->
+          <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0 && msg.type === 'assistant'">
+            <div class="suggestions-label">¿Te interesa?</div>
+            <button *ngFor="let suggestion of msg.suggestions" 
+                    class="suggestion-btn"
+                    (click)="useSuggestion(suggestion)">
+              {{ suggestion }}
+            </button>
+          </div>
+          
+          <!-- AQUÍ VAN LAS FUENTES - ESTO ES LO NUEVO -->
+          <div class="sources" *ngIf="msg.sources && msg.sources.length > 0 && msg.type === 'assistant'">
+            <div class="sources-label">Fuentes:</div>
+            <div *ngFor="let source of msg.sources" class="source-item">
+              <span class="source-icon">📚</span>
+              <span class="source-text">{{ getSourceDisplay(source) }}</span>
+            </div>
+          </div>
+          <!-- FIN DEL CÓDIGO NUEVO -->
+          
+        </div>
+      </div>
+
+      <!-- Indicador de carga -->
+      <div class="loading-indicator" *ngIf="loading">
+        <div class="typing-animation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span>Procesando pregunta...</span>
       </div>
     </div>
 
+    <!-- Input y controles -->
     <div class="input-section">
       <div class="input-container">
-        <input [(ngModel)]="userInput" 
+        <input type="text" 
+               [(ngModel)]="userInput" 
                (keyup.enter)="sendMessage()"
-               placeholder="Escribe tu pregunta sobre QA...">
-        <button (click)="sendMessage()">➤</button>
+               placeholder="Escribe tu pregunta sobre QA..."
+               [disabled]="loading">
+        <button class="send-btn" 
+                (click)="sendMessage()" 
+                [disabled]="loading || !userInput.trim()">
+          <span *ngIf="!loading">➤</span>
+          <div class="spinner" *ngIf="loading"></div>
+        </button>
       </div>
       
+      <!-- Botones de acción -->
       <div class="action-buttons">
-        <button class="action-btn" (click)="clearChat()">🗑️ Limpiar</button>
+        <button class="action-btn" (click)="clearChat()" title="Limpiar chat">
+          🗑️ Limpiar
+        </button>
+        <button class="action-btn" (click)="toggleChat()" title="Minimizar">
+          📌 Minimizar
+        </button>
       </div>
     </div>
   </div>

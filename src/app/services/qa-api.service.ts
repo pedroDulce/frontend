@@ -2,15 +2,17 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export interface ChatRequest {
-  question: string;
-}
-
+// Interfaces para las fuentes de información
 export interface SourceDTO {
+  type: string;
+  description: string;
   title?: string;
   url?: string;
   content?: string;
-  type?: string;  // ← Agrega esto si tu backend lo envía
+}
+
+export interface ChatRequest {
+  question: string;
 }
 
 export interface ChatResponse {
@@ -23,9 +25,10 @@ export interface Aplicacion {
   id?: number;
   nombre?: string;
   descripcion?: string;
-  equipoResponsable ?: string;
+  equipoResponsable?: string;
   estado?: string;
-  // añade más propiedades según tu modelo
+  fechaCreacion?: Date;
+  elementosPromocionables?: any[];
 }
 
 export interface RankingDTO {

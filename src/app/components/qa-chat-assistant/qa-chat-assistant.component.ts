@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QaApiService, ChatResponse, SourceDTO } from '../../services/qa-api.service';
 
-// Interface corregida
+// Interface corregida con SourceDTO
 interface QAMessage {
   text: string;
-  type: 'user' | 'assistant';  // ← Tipo literal, no string genérico
+  type: 'user' | 'assistant';
   timestamp: Date;
   suggestions?: string[];
-  sources?: SourceDTO[];
+  sources?: SourceDTO[];  // ← Usar SourceDTO importado
 }
 
 @Component({
@@ -45,14 +45,17 @@ export class QaChatAssistantComponent implements OnInit {
     this.addWelcomeMessage();
   }
 
-  // Función corregida para enviar mensajes
+  // Función para mostrar fuentes en el template
+  getSourceDisplay(source: SourceDTO): string {
+    return source.title || source.description || source.type || 'Fuente';
+  }
+
   sendMessage() {
     if (!this.userInput.trim() || this.loading) return;
 
-    // Crear mensaje de usuario con tipo correcto
     const userMessage: QAMessage = {
       text: this.userInput,
-      type: 'user',  // ← Tipo literal 'user'
+      type: 'user',
       timestamp: new Date()
     };
 
@@ -63,29 +66,39 @@ export class QaChatAssistantComponent implements OnInit {
 
     this.qaApi.sendMessage(currentInput).subscribe({
       next: (response: ChatResponse) => {
-        // Crear mensaje del asistente con tipo correcto
         const assistantMessage: QAMessage = {
           text: response.answer,
-          type: 'assistant',  // ← Tipo literal 'assistant'
+          type: 'assistant',
           timestamp: new Date(),
           suggestions: response.suggestions,
-          sources: response.sources
+          sources: response.sources  // ← Ahora SourceDTO está definido
         };
 
         this.messages.push(assistantMessage);
         this.loading = false;
+        this.scrollToBottom();
       },
       error: (error) => {
         console.error('Error:', error);
         const errorMessage: QAMessage = {
-          text: '❌ Error conectando con el servidor',
-          type: 'assistant',  // ← Tipo literal
+          text: '❌ Error conectando con el servidor: ' + error.message,
+          type: 'assistant',
           timestamp: new Date()
         };
         this.messages.push(errorMessage);
         this.loading = false;
+        this.scrollToBottom();
       }
     });
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      const container = document.querySelector('.messages-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 100);
   }
 
   private checkBackendConnection() {
@@ -95,7 +108,8 @@ export class QaChatAssistantComponent implements OnInit {
         this.backendStatus = 'connected';
         this.addWelcomeMessage();
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error conectando al backend:', err);
         this.backendStatus = 'error';
         this.addWelcomeMessage();
       }
@@ -111,7 +125,8 @@ export class QaChatAssistantComponent implements OnInit {
         suggestions: [
           '¿Qué entidades principales tiene el sistema?',
           '¿Cómo se calcula el ranking de cobertura?',
-          'Explícame el modelo de datos'
+          'Explícame el modelo de datos',
+          '¿Qué tipos de pruebas se realizan?'
         ]
       };
       this.messages.push(welcomeMessage);
