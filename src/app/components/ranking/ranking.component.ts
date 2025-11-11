@@ -4,7 +4,8 @@ import { QaApiService, RankingDTO } from '../../services/qa-api.service';
 @Component({
   selector: 'app-ranking',
   templateUrl: './ranking.component.html',
-  styleUrls: ['./ranking.component.css']
+  styleUrls: ['./ranking.component.css'],
+  standalone: true,
 })
 export class RankingComponent implements OnInit {
   ranking: RankingDTO[] = [];

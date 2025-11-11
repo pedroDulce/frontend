@@ -12,7 +12,8 @@ interface QAMessage {
 @Component({
   selector: 'app-qa-chat-assistant',
   templateUrl: './qa-chat-assistant.component.html',
-  styleUrls: ['./qa-chat-assistant.component.css']
+  styleUrls: ['./qa-chat-assistant.component.css'],
+  standalone: true,
 })
 export class QaChatAssistantComponent implements OnInit {
   isCollapsed = false;
