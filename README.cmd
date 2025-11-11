@@ -1,1 +1,0 @@
-Frontend demo con RAG

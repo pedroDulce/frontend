@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { QaChatAssistantComponent } from "./components/qa-chat-assistant/qa-chat-assistant.component";
-import { RankingComponent } from "./ranking/ranking.component";
+import { RankingComponent } from "./components/ranking/ranking.component";
 
 
 @Component({
@@ -84,7 +84,7 @@ import { RankingComponent } from "./ranking/ranking.component";
       50% { opacity: 0.5; }
     }
   `],
-  imports: [QaChatAssistantComponent, RankingComponent, QaChatAssistantComponent]
+  imports: [QaChatAssistantComponent, RankingComponent]
 })
 export class AppComponent {
   title: any;
