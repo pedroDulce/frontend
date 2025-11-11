@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { QaApiService, RankingDTO } from '../../services/qa-api.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-ranking',
   templateUrl: './ranking.component.html',
   styleUrls: ['./ranking.component.css'],
   standalone: true,
+  imports: [CommonModule]
 })
 export class RankingComponent implements OnInit {
   ranking: RankingDTO[] = [];

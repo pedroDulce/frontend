@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { QaApiService, ChatResponse, SourceDTO } from '../../services/qa-api.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 interface QAMessage {
   text: string;
@@ -14,6 +16,7 @@ interface QAMessage {
   templateUrl: './qa-chat-assistant.component.html',
   styleUrls: ['./qa-chat-assistant.component.css'],
   standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class QaChatAssistantComponent implements OnInit {
   isCollapsed = false;
