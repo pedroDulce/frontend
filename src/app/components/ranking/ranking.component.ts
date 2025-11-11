@@ -36,8 +36,9 @@ export class RankingComponent implements OnInit {
   }
 
   getCoberturaColor(cobertura: number): string {
-    if (cobertura >= 80) return 'text-green-600';
-    if (cobertura >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (cobertura >= 80) return 'cobertura-excelente';
+    if (cobertura >= 60) return 'cobertura-buena';
+    return 'cobertura-regular';
   }
+
 }

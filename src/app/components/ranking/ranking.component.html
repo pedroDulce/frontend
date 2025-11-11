@@ -1,27 +1,47 @@
 <div class="ranking-container">
-  <h2 class="text-2xl font-bold mb-6 text-gray-800">🏆 Ranking de Cobertura QA</h2>
+  <h2 class="ranking-title">🏆 Ranking de Cobertura QA</h2>
   
   @if (loading) {
-    <div class="loading">Cargando ranking...</div>
+    <div class="loading">📊 Cargando ranking de aplicaciones...</div>
   }
   
   @if (error) {
-    <div class="error-message">{{ error }}</div>
+    <div class="error-message">❌ {{ error }}</div>
   }
   
   @if (!loading && !error) {
     <div class="ranking-list">
-      @for (item of ranking; track $index) {
+      @for (item of ranking; track $index; let i = $index) {
         <div class="ranking-item">
           <div class="app-info">
-            <h3 class="app-name">{{ item.aplicacion.nombre }}</h3>
+            <h3 class="app-name">
+              @if (i === 0) {
+                🥇 
+              } @else if (i === 1) {
+                🥈 
+              } @else if (i === 2) {
+                🥈 
+              }
+              {{ item.aplicacion.nombre }}
+            </h3>
             <p class="app-description">{{ item.aplicacion.descripcion }}</p>
+            <div class="app-meta">
+              <small><strong>Equipo:</strong> {{ item.aplicacion.equipoResponsable }}</small> • 
+              <small><strong>Estado:</strong> {{ item.aplicacion.estado }}</small>
+            </div>
           </div>
           <div class="cobertura-info">
             <span class="cobertura-badge" [class]="getCoberturaColor(item.cobertura)">
               {{ item.cobertura }}%
             </span>
           </div>
+        </div>
+      }
+      
+      @if (ranking.length === 0) {
+        <div class="error-message">
+          📝 No hay datos de ranking disponibles. 
+          <br><small>Verifica que el backend tenga aplicaciones cargadas.</small>
         </div>
       }
     </div>

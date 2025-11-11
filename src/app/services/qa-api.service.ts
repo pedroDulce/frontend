@@ -23,6 +23,8 @@ export interface Aplicacion {
   id?: number;
   nombre?: string;
   descripcion?: string;
+  equipoResponsable ?: string;
+  estado?: string;
   // añade más propiedades según tu modelo
 }
 
