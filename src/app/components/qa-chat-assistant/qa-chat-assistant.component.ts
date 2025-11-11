@@ -40,9 +40,19 @@ export class QaChatAssistantComponent implements OnInit {
     this.userInput = suggestion;
   }
 
+
   clearChat() {
+    // Limpiar los mensajes del chat
     this.messages = [];
-    this.addWelcomeMessage();
+    
+    // LIMPIAR TAMBIÉN EL INPUT DEL USUARIO
+    this.userInput = '';
+    
+    // Opcional: también podrías limpiar el estado de loading por si acaso
+    this.loading = false;
+    
+    // Si usas algún servicio de almacenamiento, también limpiarlo ahí
+    // this.chatService.clearChat();
   }
 
   // Función para mostrar fuentes en el template

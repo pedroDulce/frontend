@@ -24,17 +24,20 @@
           <!-- Timestamp -->
           <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
           
-          <!-- AQUÍ VAN LAS SUGERENCIAS -->
+          <!-- AQUÍ VAN LAS SUGERENCIAS - CON NUEVO ESTILO -->
           <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0 && msg.type === 'assistant'">
             <div class="suggestions-label">¿Te interesa?</div>
-            <button *ngFor="let suggestion of msg.suggestions" 
-                    class="suggestion-btn"
-                    (click)="useSuggestion(suggestion)">
-              {{ suggestion }}
-            </button>
+            <div class="suggestions-grid">
+              <button *ngFor="let suggestion of msg.suggestions" 
+                      class="suggestion-btn-modern"
+                      (click)="useSuggestion(suggestion)">
+                <i class="suggestion-icon"></i>
+                {{ suggestion }}
+              </button>
+            </div>
           </div>
           
-          <!-- AQUÍ VAN LAS FUENTES - ESTO ES LO NUEVO -->
+          <!-- AQUÍ VAN LAS FUENTES -->
           <div class="sources" *ngIf="msg.sources && msg.sources.length > 0 && msg.type === 'assistant'">
             <div class="sources-label">Fuentes:</div>
             <div *ngFor="let source of msg.sources" class="source-item">
@@ -42,8 +45,6 @@
               <span class="source-text">{{ getSourceDisplay(source) }}</span>
             </div>
           </div>
-          <!-- FIN DEL CÓDIGO NUEVO -->
-          
         </div>
       </div>
 
@@ -58,29 +59,36 @@
       </div>
     </div>
 
-    <!-- Input y controles -->
+    <!-- Input y controles - CON NUEVO ESTILO -->
     <div class="input-section">
-      <div class="input-container">
+      <div class="input-container-modern">
         <input type="text" 
+               class="question-input-modern"
                [(ngModel)]="userInput" 
                (keyup.enter)="sendMessage()"
                placeholder="Escribe tu pregunta sobre QA..."
                [disabled]="loading">
-        <button class="send-btn" 
+        <button class="send-btn-modern" 
                 (click)="sendMessage()" 
                 [disabled]="loading || !userInput.trim()">
-          <span *ngIf="!loading">➤</span>
-          <div class="spinner" *ngIf="loading"></div>
+          <i class="send-icon"></i>
+          <div class="spinner-modern" *ngIf="loading"></div>
         </button>
       </div>
       
-      <!-- Botones de acción -->
-      <div class="action-buttons">
-        <button class="action-btn" (click)="clearChat()" title="Limpiar chat">
-          🗑️ Limpiar
+      <!-- Botones de acción - ACTUALIZADOS -->
+      <div class="action-buttons-modern">
+        <button class="action-btn-modern clear-btn" 
+                (click)="clearChat()" 
+                title="Limpiar chat">
+          <i class="action-icon clear-icon"></i>
+          Limpiar
         </button>
-        <button class="action-btn" (click)="toggleChat()" title="Minimizar">
-          📌 Minimizar
+        <button class="action-btn-modern minimize-btn" 
+                (click)="toggleChat()" 
+                title="Minimizar">
+          <i class="action-icon minimize-icon"></i>
+          Minimizar
         </button>
       </div>
     </div>
