@@ -1,118 +1,37 @@
 <div class="chat-widget" [class.collapsed]="isCollapsed">
-  <!-- Header del Chat -->
   <div class="chat-header" (click)="toggleChat()">
-    <div class="header-content">
-      <h3>💬 QA Assistant</h3>
-      <div class="status-indicator">
-        <span class="status-dot" [class.connected]="backendStatus === 'connected'" 
-              [class.error]="backendStatus === 'error'"></span>
-        <span>{{ backendStatus === 'connected' ? 'Conectado' : 
-                backendStatus === 'error' ? 'Error' : 'Conectando...' }}</span>
-      </div>
-    </div>
+    <h3>💬 QA Assistant</h3>
     <button class="toggle-btn" (click)="toggleChat(); $event.stopPropagation()">
       {{ isCollapsed ? '↑' : '↓' }}
     </button>
   </div>
 
-  <!-- Contenido del Chat -->
   <div class="chat-content" *ngIf="!isCollapsed">
-    
-    <!-- Mensaje de Bienvenida con Preguntas Rápidas -->
-    <div class="welcome-section" *ngIf="messages.length === 0">
-      <div class="welcome-message">
-        <h4>¡Bienvenido al QA Assistant! 👋</h4>
-        <p>Selecciona una pregunta rápida o escribe la tuya:</p>
-      </div>
-      <div class="quick-questions">
-        <button *ngFor="let question of quickQuestions" 
-                class="quick-btn" 
-                (click)="quickQuestion(question)">
-          {{ question }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Contenedor de Mensajes -->
     <div class="messages-container">
-      <div *ngFor="let msg of messages; trackBy: trackByFn" 
-           class="message" 
-           [class.user-message]="msg.type === 'user'"
-           [class.assistant-message]="msg.type === 'assistant'">
+      <div *ngFor="let msg of messages" class="message" [class.user-message]="msg.type === 'user'">
+        <div class="message-text">{{ msg.text }}</div>
         
-        <!-- Avatar y Contenido -->
-        <div class="message-avatar">
-          {{ msg.type === 'user' ? '👤' : '🤖' }}
+        <!-- Sugerencias -->
+        <div *ngIf="msg.suggestions && msg.type === 'assistant'" class="suggestions">
+          <button *ngFor="let suggestion of msg.suggestions" 
+                  class="suggestion-btn"
+                  (click)="useSuggestion(suggestion)">
+            {{ suggestion }}
+          </button>
         </div>
-        
-        <div class="message-content">
-          <!-- Texto del Mensaje -->
-          <div class="message-text" [innerHTML]="formatMessage(msg.text)"></div>
-          
-          <!-- Timestamp -->
-          <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
-          
-          <!-- Sugerencias -->
-          <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0">
-            <div class="suggestions-label">¿Te interesa?</div>
-            <button *ngFor="let suggestion of msg.suggestions" 
-                    class="suggestion-btn"
-                    (click)="useSuggestion(suggestion)">
-              {{ suggestion }}
-            </button>
-          </div>
-          
-          <!-- Fuentes -->
-          <div class="sources" *ngIf="msg.sources && msg.sources.length > 0">
-            <div class="sources-label">Fuentes:</div>
-            <div *ngFor="let source of msg.sources" class="source-item">
-              <span class="source-icon">📚</span>
-              <span class="source-text">
-                {{ source.title || getFileName(source.url || '') }}
-              </span>
-              <a *ngIf="source.url" [href]="source.url" target="_blank" class="source-link">
-                🔗
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Indicador de Carga -->
-      <div class="loading-indicator" *ngIf="loading">
-        <div class="typing-animation">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <span>Procesando pregunta...</span>
       </div>
     </div>
 
-    <!-- Input y Controles -->
     <div class="input-section">
       <div class="input-container">
-        <input type="text" 
-               [(ngModel)]="userInput" 
+        <input [(ngModel)]="userInput" 
                (keyup.enter)="sendMessage()"
-               placeholder="Escribe tu pregunta sobre QA..."
-               [disabled]="loading">
-        <button class="send-btn" 
-                (click)="sendMessage()" 
-                [disabled]="loading || !userInput.trim()">
-          <span *ngIf="!loading">➤</span>
-          <div class="spinner" *ngIf="loading"></div>
-        </button>
+               placeholder="Escribe tu pregunta sobre QA...">
+        <button (click)="sendMessage()">➤</button>
       </div>
       
-      <!-- Botones de Acción -->
       <div class="action-buttons">
-        <button class="action-btn" (click)="clearChat()" title="Limpiar chat">
-          🗑️ Limpiar
-        </button>
-        <button class="action-btn" (click)="toggleChat()" title="Minimizar">
-          📌 Minimizar
-        </button>
+        <button class="action-btn" (click)="clearChat()">🗑️ Limpiar</button>
       </div>
     </div>
   </div>
