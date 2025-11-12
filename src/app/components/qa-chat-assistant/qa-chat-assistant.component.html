@@ -37,22 +37,10 @@
         </div>
         
         <div class="message-content">
-          <div class="message-text">{{ msg.text }}</div>
+          <!--<div class="message-text">{{ msg.text }}</div>-->
+          <div class="message-text" [innerHTML]="msg.text"></div>
           <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
-          
-          <!-- Sugerencias para errores -->
-          <!--div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0 && msg.type === 'assistant'">
-            <div class="suggestions-label">Acciones:</div>
-            <div class="suggestions-grid">
-              <button *ngFor="let suggestion of msg.suggestions" 
-                      class="suggestion-btn-modern"
-                      (click)="useSuggestion(suggestion)"
-                      [disabled]="loading">
-                <i class="suggestion-icon"></i>
-                {{ suggestion }}
-              </button>
-            </div>
-          </div>-->
+                    
           <!-- En sugerencias, asegurar un solo click -->
         <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0">
           <div class="suggestions-label">Acciones:</div>
