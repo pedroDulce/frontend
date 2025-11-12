@@ -40,7 +40,7 @@ export class QaChatAssistantComponent implements OnInit {
   // ← AÑADIDO: Método para alternar chat
   toggleChat() {
     this.isCollapsed = !this.isCollapsed;
-    console.log('💬 Chat ' + (this.isCollapsed ? 'minimizado' : 'expandido'));
+    //console.log('💬 Chat ' + (this.isCollapsed ? 'minimizado' : 'expandido'));
   }
 
   // ← AÑADIDO: Método para trackBy
@@ -198,7 +198,7 @@ export class QaChatAssistantComponent implements OnInit {
   private resetLoadingState() {
     this.loading = false;
     this.isProcessing = false;
-    console.log('🔄 Estado resetado');
+    //console.log('🔄 Estado resetado');
   }
 
   // ← AÑADIDO: Método clearChat completo

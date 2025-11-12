@@ -104,7 +104,7 @@ export class QaApiService {
   getRankingData(): Observable<any> {
     return this.http.get(`${this.baseUrl}/ranking`).pipe(
       tap((response: any) => {
-        console.log('📊 Respuesta del ranking:', response);
+        //console.log('📊 Respuesta del ranking:', response);
         // Verifica que los datos tengan la estructura correcta
       }),
       catchError(error => {

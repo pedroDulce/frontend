@@ -25,7 +25,7 @@ export class RankingComponent implements OnInit {
     this.qaApi.getRanking().subscribe({
       next: (data) => {
         this.ranking = data;
-        console.log("datos: ", data)
+        //console.log("datos: ", data)
         this.loading = false;
         console.log('Ranking cargado:', data); // ← Para debug
       },
