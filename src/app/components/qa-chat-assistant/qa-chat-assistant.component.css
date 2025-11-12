@@ -29,6 +29,12 @@
   box-shadow: 0 5px 15px rgba(106, 17, 203, 0.15);
 }
 
+.suggestion-btn-modern:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 .suggestion-icon {
   margin-right: 8px;
   color: #6a11cb;
@@ -37,6 +43,11 @@
 
 .suggestion-icon::before {
   content: "💡";
+}
+
+.suggestion-loading {
+  margin-left: 5px;
+  font-size: 0.8rem;
 }
 
 /* NUEVOS ESTILOS PARA INPUT MODERNO */
@@ -65,6 +76,11 @@
   border-color: #6a11cb;
 }
 
+.question-input-modern.loading {
+  border-color: #8e9eab !important;
+  background-color: #f8f9fa;
+}
+
 .send-btn-modern {
   background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
   color: white;
@@ -91,19 +107,20 @@
   transform: none;
 }
 
+.send-btn-modern.loading {
+  background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%) !important;
+  cursor: not-allowed;
+}
+
+.send-btn-modern.disabled {
+  background: #95a5a6 !important;
+  cursor: not-allowed;
+}
+
 .send-icon::before {
   content: "➤";
   color: white;
   font-size: 1.1rem;
-}
-
-.spinner-modern {
-  width: 18px;
-  height: 18px;
-  border: 2px solid transparent;
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
 }
 
 /* NUEVOS ESTILOS PARA BOTONES DE ACCIÓN MODERNOS */
@@ -159,7 +176,61 @@
   box-shadow: 0 5px 15px rgba(46, 213, 115, 0.15);
 }
 
+/* Tooltip */
+.btn-tooltip {
+  font-size: 0.7rem;
+  margin-top: 2px;
+  opacity: 0.8;
+}
+
+/* Spinner mejorado */
+.spinner-modern {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Estados del servidor */
+.server-status {
+  margin-right: 10px;
+  font-size: 0.8rem;
+}
+
+.system-alert {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alert-icon {
+  font-size: 1.2rem;
+}
+
+.alert-text {
+  font-size: 0.9rem;
+  color: #856404;
+}
+
+/* Mensajes de sistema y error */
+.system-message .message-content {
+  background: #e3f2fd;
+  border-color: #bbdefb;
+}
+
+.error-message .message-content {
+  background: #ffebee;
+  border-color: #ffcdd2;
 }

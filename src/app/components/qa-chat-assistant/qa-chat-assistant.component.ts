@@ -19,132 +19,202 @@ interface QAMessage {
   templateUrl: './qa-chat-assistant.component.html',
   styleUrls: ['./qa-chat-assistant.component.css']
 })
+
+
 export class QaChatAssistantComponent implements OnInit {
-  isCollapsed = false;
-  messages: QAMessage[] = [];
+  messages: any[] = [];
   loading = false;
   userInput = '';
-  backendStatus: 'checking' | 'connected' | 'error' = 'checking';
+  isCollapsed = false; // ← AÑADIDO
+  serverAvailable = true;
+  private isProcessing = false;
 
-  constructor(private qaApi: QaApiService) {}
+  constructor(private qaService: QaApiService) {}
 
   ngOnInit() {
-    this.checkBackendConnection();
+    this.checkServerConnection();
+    // Mensaje de bienvenida inicial
+    this.addWelcomeMessage();
   }
 
-
+  // ← AÑADIDO: Método para alternar chat
   toggleChat() {
     this.isCollapsed = !this.isCollapsed;
+    console.log('💬 Chat ' + (this.isCollapsed ? 'minimizado' : 'expandido'));
   }
 
-  useSuggestion(suggestion: string) {
-    this.userInput = suggestion;
+  // ← AÑADIDO: Método para trackBy
+  trackByFn(index: number, item: any): any {
+    return item.timestamp + index; // Identificador único
   }
 
-
-  clearChat() {
-    // Limpiar los mensajes del chat
-    this.messages = [];
-    
-    // LIMPIAR TAMBIÉN EL INPUT DEL USUARIO
-    this.userInput = '';
-    
-    // Opcional: también podrías limpiar el estado de loading por si acaso
-    this.loading = false;
-    
-    // Si usas algún servicio de almacenamiento, también limpiarlo ahí
-    // this.chatService.clearChat();
+  // Mensaje de bienvenida
+  private addWelcomeMessage() {
+    const welcomeMessage = {
+      text: '¡Hola! Soy tu asistente de QA. ¿En qué puedo ayudarte?',
+      type: 'assistant',
+      timestamp: new Date(),
+      suggestions: [
+        '¿Qué entidades principales tiene el sistema?',
+        '¿Cómo se calcula el ranking de cobertura?',
+        'Explicarme el modelo de datos',
+        '¿Qué tipos de pruebas se realizan?'
+      ]
+    };
+    this.messages = [welcomeMessage];
   }
 
-  // Función para mostrar fuentes en el template
-  getSourceDisplay(source: SourceDTO): string {
-    return source.title || source.description || source.type || 'Fuente';
+  checkServerConnection() {
+    this.qaService.checkServerStatus().subscribe({
+      next: () => {
+        console.log('✅ Servidor conectado');
+        this.serverAvailable = true;
+      },
+      error: () => {
+        console.error('❌ Servidor no disponible');
+        this.serverAvailable = false;
+        this.addSystemMessage('El servidor no está disponible. Verifica que el backend esté ejecutándose.');
+      }
+    });
   }
 
   sendMessage() {
-    if (!this.userInput.trim() || this.loading) return;
+    if (this.isProcessing || this.loading || !this.userInput.trim()) {
+      return;
+    }
 
-    const userMessage: QAMessage = {
+    if (!this.serverAvailable) {
+      this.addSystemMessage('El servidor no está disponible. No se pueden enviar mensajes.');
+      return;
+    }
+
+    this.isProcessing = true;
+    this.loading = true;
+
+    const userMessage = {
       text: this.userInput,
       type: 'user',
       timestamp: new Date()
     };
 
-    this.messages.push(userMessage);
+    this.messages = [...this.messages, userMessage];
     const currentInput = this.userInput;
     this.userInput = '';
-    this.loading = true;
 
-    this.qaApi.sendMessage(currentInput).subscribe({
+    console.log('📤 Enviando mensaje al servidor...');
+
+    this.qaService.sendMessage(currentInput).subscribe({
       next: (response: ChatResponse) => {
-        const assistantMessage: QAMessage = {
-          text: response.answer,
+        console.log('✅ Respuesta procesada correctamente:', response);
+        
+        let answerText = 'No se pudo generar una respuesta.';
+        
+        // Manejar diferentes formatos de respuesta
+        if (typeof response === 'string') {
+          answerText = response;
+        } else if (response?.answer) {
+          answerText = response.answer;
+        }
+
+        const assistantMessage = {
+          text: answerText,
           type: 'assistant',
           timestamp: new Date(),
-          suggestions: response.suggestions,
-          sources: response.sources  // ← Ahora SourceDTO está definido
+          suggestions: response?.suggestions || this.getDefaultSuggestions(),
+          sources: response?.sources || []
         };
 
-        this.messages.push(assistantMessage);
-        this.loading = false;
-        this.scrollToBottom();
+        this.messages = [...this.messages, assistantMessage];
+        this.resetLoadingState();
       },
-      error: (error) => {
-        console.error('Error:', error);
-        const errorMessage: QAMessage = {
-          text: '❌ Error conectando con el servidor: ' + error.message,
+      error: (error: { userMessage: any; technicalError: { status: number; }; }) => {
+        console.error('❌ Error en la comunicación:', error);
+        
+        const errorMessage = {
+          text: error.userMessage || 'Error de conexión con el servidor.',
           type: 'assistant',
-          timestamp: new Date()
+          timestamp: new Date(),
+          suggestions: ['Reintentar', 'Verificar conexión'],
+          isError: true
         };
-        this.messages.push(errorMessage);
-        this.loading = false;
-        this.scrollToBottom();
+
+        this.messages = [...this.messages, errorMessage];
+        this.resetLoadingState();
+        
+        // Verificar si el servidor cayó
+        if (error.technicalError?.status === 0) {
+          this.serverAvailable = false;
+        }
       }
     });
   }
 
-  private scrollToBottom() {
-    setTimeout(() => {
-      const container = document.querySelector('.messages-container');
-      if (container) {
-        container.scrollTop = container.scrollHeight;
-      }
-    }, 100);
-  }
-
-  private checkBackendConnection() {
-    this.backendStatus = 'checking';
-    this.qaApi.getRanking().subscribe({
-      next: () => {
-        this.backendStatus = 'connected';
-        this.addWelcomeMessage();
-      },
-      error: (err) => {
-        console.error('Error conectando al backend:', err);
-        this.backendStatus = 'error';
-        this.addWelcomeMessage();
-      }
-    });
-  }
-
-  private addWelcomeMessage() {
-    if (this.messages.length === 0) {
-      const welcomeMessage: QAMessage = {
-        text: '¡Hola! Soy tu asistente de QA. ¿En qué puedo ayudarte?',
-        type: 'assistant',
-        timestamp: new Date(),
-        suggestions: [
-          '¿Qué entidades principales tiene el sistema?',
-          '¿Cómo se calcula el ranking de cobertura?',
-          'Explícame el modelo de datos',
-          '¿Qué tipos de pruebas se realizan?'
-        ]
-      };
-      this.messages.push(welcomeMessage);
+  useSuggestion(suggestion: string) {
+    if (this.isProcessing || this.loading) {
+      return;
     }
+
+    if (suggestion === 'Reintentar' && this.messages.length > 0) {
+      // Reintentar el último mensaje del usuario
+      const lastUserMessage = this.messages
+        .filter(msg => msg.type === 'user')
+        .pop();
+      
+      if (lastUserMessage) {
+        this.userInput = lastUserMessage.text;
+        setTimeout(() => this.sendMessage(), 100);
+      }
+      return;
+    }
+
+    if (suggestion === 'Verificar conexión') {
+      this.checkServerConnection();
+      return;
+    }
+
+    this.userInput = suggestion;
+    setTimeout(() => this.sendMessage(), 100);
   }
 
-  trackByFn(index: number, item: QAMessage): number {
-    return index;
+  // ← AÑADIDO: Sugerencias por defecto
+  private getDefaultSuggestions(): string[] {
+    return [
+      '¿Qué entidades principales tiene el sistema?',
+      '¿Cómo se calcula el ranking de cobertura?',
+      'Explicarme el modelo de datos',
+      '¿Qué tipos de pruebas se realizan?'
+    ];
+  }
+
+  private addSystemMessage(text: string) {
+    const systemMessage = {
+      text: text,
+      type: 'system',
+      timestamp: new Date()
+    };
+    this.messages = [...this.messages, systemMessage];
+  }
+
+  private resetLoadingState() {
+    this.loading = false;
+    this.isProcessing = false;
+    console.log('🔄 Estado resetado');
+  }
+
+  // ← AÑADIDO: Método clearChat completo
+  clearChat() {
+    this.messages = [];
+    this.userInput = '';
+    this.resetLoadingState();
+    // Añadir mensaje de bienvenida después de limpiar
+    setTimeout(() => this.addWelcomeMessage(), 100);
+  }
+
+  // ← AÑADIDO: Método para mostrar fuentes (si lo necesitas)
+  getSourceDisplay(source: any): string {
+    if (typeof source === 'string') {
+      return source;
+    }
+    return source?.name || source?.title || 'Fuente desconocida';
   }
 }
