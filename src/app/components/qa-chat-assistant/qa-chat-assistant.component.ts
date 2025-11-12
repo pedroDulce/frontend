@@ -78,13 +78,9 @@ export class QaChatAssistantComponent implements OnInit {
     });
   }
 
+
   sendMessage() {
     if (this.isProcessing || this.loading || !this.userInput.trim()) {
-      return;
-    }
-
-    if (!this.serverAvailable) {
-      this.addSystemMessage('El servidor no está disponible. No se pueden enviar mensajes.');
       return;
     }
 
@@ -101,34 +97,28 @@ export class QaChatAssistantComponent implements OnInit {
     const currentInput = this.userInput;
     this.userInput = '';
 
-    console.log('📤 Enviando mensaje al servidor...');
+    console.log('🔍 Enviando mensaje:', currentInput);
 
     this.qaService.sendMessage(currentInput).subscribe({
       next: (response: ChatResponse) => {
         console.log('✅ Respuesta procesada correctamente:', response);
         
-        let answerText = 'No se pudo generar una respuesta.';
-        
-        // Manejar diferentes formatos de respuesta
-        if (typeof response === 'string') {
-          answerText = response;
-        } else if (response?.answer) {
-          answerText = response.answer;
-        }
-
         const assistantMessage = {
-          text: answerText,
+          text: response.answer,
           type: 'assistant',
           timestamp: new Date(),
-          suggestions: response?.suggestions || this.getDefaultSuggestions(),
-          sources: response?.sources || []
+          suggestions: response.suggestions || [],
+          sources: response.sources || []
         };
 
         this.messages = [...this.messages, assistantMessage];
         this.resetLoadingState();
       },
-      error: (error: { userMessage: any; technicalError: { status: number; }; }) => {
-        console.error('❌ Error en la comunicación:', error);
+      error: (error: any) => {
+        console.error('💥 Error en la comunicación:', {
+          userMessage: error.userMessage,
+          technicalError: error.technicalError
+        });
         
         const errorMessage = {
           text: error.userMessage || 'Error de conexión con el servidor.',
@@ -140,14 +130,13 @@ export class QaChatAssistantComponent implements OnInit {
 
         this.messages = [...this.messages, errorMessage];
         this.resetLoadingState();
-        
-        // Verificar si el servidor cayó
-        if (error.technicalError?.status === 0) {
-          this.serverAvailable = false;
-        }
+      },
+      complete: () => {
+        console.log('🏁 Petición completada');
       }
     });
   }
+
 
   useSuggestion(suggestion: string) {
     if (this.isProcessing || this.loading) {
