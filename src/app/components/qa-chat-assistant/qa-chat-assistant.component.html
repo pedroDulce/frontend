@@ -41,7 +41,7 @@
           <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
           
           <!-- Sugerencias para errores -->
-          <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0 && msg.type === 'assistant'">
+          <!--div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0 && msg.type === 'assistant'">
             <div class="suggestions-label">Acciones:</div>
             <div class="suggestions-grid">
               <button *ngFor="let suggestion of msg.suggestions" 
@@ -52,7 +52,19 @@
                 {{ suggestion }}
               </button>
             </div>
+          </div>-->
+          <!-- En sugerencias, asegurar un solo click -->
+        <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0">
+          <div class="suggestions-label">Acciones:</div>
+          <div class="suggestions-grid">
+            <button *ngFor="let suggestion of msg.suggestions" 
+                    class="suggestion-btn-modern"
+                    (click)="useSuggestion(suggestion); $event.stopPropagation()"
+                    [disabled]="loading">
+              {{ suggestion }}
+            </button>
           </div>
+        </div>
         </div>
       </div>
 
