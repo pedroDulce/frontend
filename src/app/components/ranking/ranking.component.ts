@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { QaApiService, RankingDTO } from '../../services/qa-api.service';
+import { QaApiService } from '../../services/qa-api.service';
+import { RankingDTO } from '../../models/chat.model';
 
 @Component({
   selector: 'app-ranking',
