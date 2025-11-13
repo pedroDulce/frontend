@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ChatRequest, RagResponse, RankingDTO } from '../models/chat.model';
+import { ChatRequest, UnifiedQueryResult, RankingDTO } from '../models/chat.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,8 @@ export class RagService {
 
   constructor(private http: HttpClient) { }
 
-  sendQuery(question: string): Observable<RagResponse> {
-    return this.http.post<RagResponse>(`${this.apiUrl}/chat`, { question });
+  sendQuery(question: string): Observable<UnifiedQueryResult> {
+    return this.http.post<UnifiedQueryResult>(`${this.apiUrl}/chat`, { question });
   }
 
   getRanking(): Observable<RankingDTO[]> {

@@ -1,36 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
-import { retry, shareReplay, take, timeout } from 'rxjs/operators';
+import { timeout } from 'rxjs/operators';
+import { RankingDTO } from '../models/chat.model';
 
 // Interfaces para las fuentes de información
-export interface SourceDTO {
-  type: string;
-  description: string;
-  title?: string;
-  url?: string;
-  content?: string;
-}
-
-export interface ChatRequest {
-  question: string;
-}
-
-export interface ChatResponse {
-  answer: string;
-  suggestions?: string[];
-  sources?: SourceDTO[];
-}
-
-
-export interface RankingDTO {
-  nombre?: string;        // ← debe coincidir con el JSON
-  descripcion?: string;
-  equipoResponsable?: string; 
-  estado?: string;
-  fechaCreacion?: Date; 
-  cobertura: number;   
-}
 
 @Injectable({
   providedIn: 'root'

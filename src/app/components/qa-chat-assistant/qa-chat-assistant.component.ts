@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { QaApiService, ChatResponse, SourceDTO } from '../../services/qa-api.service';
+import { QaApiService } from '../../services/qa-api.service';
+import { UnifiedQueryResult, SourceDTO } from '../../models/chat.model';
 
 // Interface corregida con SourceDTO
 interface QAMessage {
@@ -100,7 +101,7 @@ export class QaChatAssistantComponent implements OnInit {
     console.log('🔍 Enviando mensaje:', currentInput);
 
     this.qaService.sendMessage(currentInput).subscribe({
-      next: (response: ChatResponse) => {
+      next: (response: UnifiedQueryResult) => {
         console.log('✅ Respuesta procesada correctamente:', response);
         
         const assistantMessage = {
@@ -206,4 +207,22 @@ export class QaChatAssistantComponent implements OnInit {
     }
     return source?.name || source?.title || 'Fuente desconocida';
   }
+
+  getTableColumns(results: any[]): string[] {
+    if (!results || results.length === 0) return [];
+    return Object.keys(results[0]);
+  }
+
+  formatTableCell(value: any): string {
+    if (value === null || value === undefined) {
+      return 'NULL';
+    }
+    
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    
+    return value.toString();
+  }
+
 }

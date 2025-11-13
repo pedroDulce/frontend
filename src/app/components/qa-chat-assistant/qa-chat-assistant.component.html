@@ -37,22 +37,75 @@
         </div>
         
         <div class="message-content">
-          <!--<div class="message-text">{{ msg.text }}</div>-->
-          <div class="message-text" [innerHTML]="msg.text"></div>
-          <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
-                    
-          <!-- En sugerencias, asegurar un solo click -->
-        <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0">
-          <div class="suggestions-label">Acciones:</div>
-          <div class="suggestions-grid">
-            <button *ngFor="let suggestion of msg.suggestions" 
-                    class="suggestion-btn-modern"
-                    (click)="useSuggestion(suggestion); $event.stopPropagation()"
-                    [disabled]="loading">
-              {{ suggestion }}
-            </button>
+          <!-- Mostrar pregunta original -->
+          <div class="original-question" *ngIf="msg.response?.originalQuestion">
+            <strong>Pregunta:</strong> {{ msg.response.originalQuestion }}
           </div>
-        </div>
+
+          <!-- Indicador de tipo de respuesta -->
+          <div class="intent-badge" [class.intent-sql]="msg.response?.intent === 'SQL'" 
+                                  [class.intent-rag]="msg.response?.intent === 'RAG'">
+            {{ msg.response?.intent === 'SQL' ? '📊 CONSULTA SQL' : '📚 BÚSQUEDA DOCUMENTAL' }}
+          </div>
+
+          <!-- Respuesta principal -->
+          <div class="message-text" [innerHTML]="msg.text"></div>
+          
+          <!-- SQL Generado (solo para intent SQL) -->
+          <div class="sql-section" *ngIf="msg.response?.generatedSQL">
+            <div class="section-title">🔍 SQL Generado:</div>
+            <code class="sql-code">{{ msg.response.generatedSQL }}</code>
+          </div>
+
+          <!-- Resultados en tabla (solo para intent SQL) -->
+          <div class="results-section" *ngIf="msg.response?.rawResults && msg.response.rawResults.length > 0">
+            <div class="section-title">📋 Resultados ({{ msg.response.rawResults.length }} registros):</div>
+            <div class="table-container">
+              <table class="results-table">
+                <thead>
+                  <tr>
+                    <th *ngFor="let column of getTableColumns(msg.response.rawResults)">{{ column }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of msg.response.rawResults; let i = index">
+                    <td *ngFor="let column of getTableColumns(msg.response.rawResults)">
+                      {{ formatTableCell(row[column]) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Fuentes de información (solo para intent RAG) -->
+          <div class="sources-section" *ngIf="msg.response?.sources && msg.response.sources.length > 0">
+            <div class="section-title">📚 Fuentes consultadas:</div>
+            <div class="sources-list">
+              <div *ngFor="let source of msg.response.sources; let i = index" class="source-item">
+                <div class="source-header">
+                  <span class="source-number">#{{ i + 1 }}</span>
+                  <span class="source-id">ID: {{ source.id }}</span>
+                  <span class="source-score" *ngIf="source.score">Score: {{ source.score | number:'1.2-2' }}</span>
+                </div>
+                <div class="source-content">{{ source.content }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado de la operación -->
+          <div class="status-section" [class.status-success]="msg.response?.success" 
+                                     [class.status-error]="!msg.response?.success">
+            <span class="status-icon">{{ msg.response?.success ? '✅' : '❌' }}</span>
+            <span class="status-text">
+              {{ msg.response?.success ? 'Consulta procesada exitosamente' : 'Error en la consulta' }}
+            </span>
+            <span class="error-message" *ngIf="msg.response?.errorMessage">
+              {{ msg.response.errorMessage }}
+            </span>
+          </div>
+
+          <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
         </div>
       </div>
 
