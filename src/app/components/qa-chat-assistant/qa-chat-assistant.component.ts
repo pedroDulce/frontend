@@ -60,7 +60,14 @@ export class QaChatAssistantComponent implements OnInit {
         '¿Cómo se calcula el ranking de cobertura?',
         'Explicarme el modelo de datos',
         '¿Qué tipos de pruebas se realizan?'
-      ]
+      ],
+      isError: false,
+      response: {
+        success: true,
+        intent: 'WELCOME',
+        answer: '¡Hola! Soy tu asistente de QA. ¿En qué puedo ayudarte?',
+        originalQuestion: ''
+      } as unknown as UnifiedQueryResult
     };
     this.messages = [welcomeMessage];
   }
@@ -69,10 +76,12 @@ export class QaChatAssistantComponent implements OnInit {
     this.qaService.checkServerStatus().subscribe({
       next: () => {
         console.log('✅ Servidor conectado');
+        alert('✅ Servidor conectado');
         this.serverAvailable = true;
       },
       error: () => {
         console.error('❌ Servidor no disponible');
+        alert('❌ Servidor no disponible');
         this.serverAvailable = false;
         this.addSystemMessage('El servidor no está disponible. Verifica que el backend esté ejecutándose.');
       }
@@ -109,7 +118,10 @@ export class QaChatAssistantComponent implements OnInit {
           type: 'assistant',
           timestamp: new Date(),
           suggestions: response.suggestions || [],
-          sources: response.sources || []
+          sources: response.sources || [],
+          success: response.success,
+          isError: !response.success, 
+          response: response // Este objeto tiene success: true
         };
 
         this.messages = [...this.messages, assistantMessage];
@@ -126,7 +138,8 @@ export class QaChatAssistantComponent implements OnInit {
           type: 'assistant',
           timestamp: new Date(),
           suggestions: ['Reintentar', 'Verificar conexión'],
-          isError: true
+          success: false,
+          isError: true          
         };
 
         this.messages = [...this.messages, errorMessage];

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { RankingDTO } from '../models/chat.model';
+import { QuestionRequest, RankingDTO, UnifiedQueryResult } from '../models/chat.model';
 
 // Interfaces para las fuentes de información
 
@@ -15,41 +15,49 @@ export class QaApiService {
 
   constructor(private http: HttpClient) {}
 
+  /*askQuestion(request: QuestionRequest): Observable<UnifiedQueryResult> {
+    return this.http.post<UnifiedQueryResult>(`${this.baseUrl}/chat`, request)
+      .pipe(
+        timeout(this.timeoutMs),
+        catchError(this.handleError)
+      );
+  }*/
+
 
     sendMessage(message: string): Observable<any> {
-    console.log('📨 Servicio - Enviando mensaje a:', `${this.baseUrl}/chat`);
-    console.log('📝 Mensaje:', message);
+      console.log('📨 Servicio - Enviando mensaje a:', `${this.baseUrl}/chat`);
+      console.log('📝 Mensaje:', message);
 
-    return this.http.post(`${this.baseUrl}/chat`, { question: message }).pipe(
-      tap(response => {
-        console.log('✅ Respuesta del servidor:', response);
-      }),
-      timeout(15000),
-      catchError((error: HttpErrorResponse) => {
-        console.error('💥 Error HTTP completo:', {
-          status: error.status,
-          statusText: error.statusText,
-          url: error.url,
-          message: error.message,
-          error: error.error
-        });
+      return this.http.post(`${this.baseUrl}/chat`, { question: message }).pipe(
+        tap(response => {
+          //console.log('✅ Respuesta del servidor:', response);
+        }),
+        timeout(60000),
+        catchError((error: HttpErrorResponse) => {
+          console.error('💥 Error HTTP completo:', {
+            status: error.status,
+            statusText: error.statusText,
+            url: error.url,
+            message: error.message,
+            error: error.error
+          });
 
-        let userMessage = 'Lo siento, hubo un error procesando tu pregunta.';
-        
-        if (error.status === 0) {
-          userMessage = 'Error de conexión: El servidor no está disponible.';
-        } else if (error.status === 404) {
-          userMessage = 'Error: Endpoint no encontrado. Verifica la URL.';
-        } else if (error.status === 500) {
-          userMessage = 'Error interno del servidor.';
-        }
+          let userMessage = 'Lo siento, hubo un error procesando tu pregunta.';
+          
+          if (error.status === 0) {
+            userMessage = 'Error de conexión: El servidor no está disponible.';
+          } else if (error.status === 404) {
+            userMessage = 'Error: Endpoint no encontrado. Verifica la URL.';
+          } else if (error.status === 500) {
+            userMessage = 'Error interno del servidor.';
+          }
 
-        return throwError(() => ({
-          userMessage: userMessage,
-          technicalError: error
-        }));
-      })
-    );
+          return throwError(() => ({
+            userMessage: userMessage,
+            technicalError: error
+          }));
+        })
+      );
   }
 
   // ← AÑADIDO: Método para verificar estado del servidor

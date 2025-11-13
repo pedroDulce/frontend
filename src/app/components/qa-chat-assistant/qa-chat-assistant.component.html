@@ -49,7 +49,8 @@
           </div>
 
           <!-- Respuesta principal -->
-          <div class="message-text" [innerHTML]="msg.text"></div>
+          <div class="message-text" *ngIf="msg.response?.intent !== 'SQL'" 
+            [innerHTML]="msg.text"></div>
           
           <!-- SQL Generado (solo para intent SQL) -->
           <div class="sql-section" *ngIf="msg.response?.generatedSQL">
@@ -94,16 +95,40 @@
           </div>
 
           <!-- Estado de la operación -->
-          <div class="status-section" [class.status-success]="msg.response?.success" 
-                                     [class.status-error]="!msg.response?.success">
-            <span class="status-icon">{{ msg.response?.success ? '✅' : '❌' }}</span>
-            <span class="status-text">
-              {{ msg.response?.success ? 'Consulta procesada exitosamente' : 'Error en la consulta' }}
-            </span>
-            <span class="error-message" *ngIf="msg.response?.errorMessage">
-              {{ msg.response.errorMessage }}
-            </span>
+          <div class="status-section" 
+              [class.status-success]="msg.response?.success && !loading" 
+              [class.status-error]="(!msg.response?.success && !loading) || (loading && msg.isError)"
+              [class.status-loading]="loading && !msg.response">
+            
+            <!-- Estado de carga -->
+            <div *ngIf="loading && !msg.response" class="loading-status">
+              <span class="status-icon">⏳</span>
+              <span class="status-text">Procesando tu consulta...</span>
+              <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <!-- Estado normal (éxito/error) 
+            <div *ngIf="!loading || msg.response">
+              <span class="status-icon">
+                <span *ngIf="msg.response?.success && !loading">✅</span>
+                <span *ngIf="!msg.response?.success && !loading">❌</span>
+              </span>
+              <span class="status-text">
+                <span *ngIf="msg.response?.success && !loading">
+                  {{ msg.response?.intent === 'WELCOME' ? 'Listo' : 'Consulta procesada exitosamente' }}
+                </span>
+                <span *ngIf="!msg.response?.success && !loading">Error en la consulta</span>
+              </span>
+              <span class="error-message" *ngIf="msg.response?.errorMessage && !loading">
+                {{ msg.response.errorMessage }}
+              </span>
+            </div>
           </div>
+          -->
 
           <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
         </div>
