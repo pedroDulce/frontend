@@ -2,7 +2,7 @@ export interface ChatRequest {
   question: string;
 }
 
-export interface ChatResponse {
+export interface RagResponse {
   answer: string;
   suggestions: string[];
   sources: SourceDTO[];
