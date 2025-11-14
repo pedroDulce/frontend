@@ -1,18 +1,285 @@
 <div class="monitoring-container">
-  <h2>Monitoreo del Sistema</h2>
+  <h2>📊 Monitoreo del Sistema</h2>
   
-  <div class="stats-grid">
-    <div class="stat-card">
-      <h3>Estadísticas de Cache</h3>
-      <p>Tamaño de cache: {{ cacheStats.size || 0 }}</p>
-      <p>Entrada más antigua: {{ cacheStats.oldestEntryAge || 0 }} segundos</p>
-    </div>
-    
-    <div class="stat-card">
-      <h3>Frecuencia de Consultas</h3>
-      <div *ngFor="let stat of frequencyStats | keyvalue" class="stat-item">
-        <strong>{{ stat.key }}</strong>: {{ stat.value }} consultas
+  <!-- Pestañas para organizar las secciones -->
+  <div class="tabs">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'cache'" 
+      (click)="activeTab = 'cache'">
+      🗂️ Gestión de Cache
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'learning'" 
+      (click)="activeTab = 'learning'">
+      🧠 Aprendizaje y Consultas
+    </button>
+  </div>
+
+  <!-- Contenido de la pestaña de Cache -->
+  <div *ngIf="activeTab === 'cache'" class="tab-content">
+    <!-- Sección de Estadísticas de Cache -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>📊 Estadísticas de Cache</h3>
+        <p><strong>Tamaño de cache:</strong> {{ cacheStats.size || 0 }} entradas</p>
+        <p><strong>Entrada más antigua:</strong> {{ cacheStats.oldestEntryAge || 0 }} segundos</p>
+        <button class="action-btn refresh-btn" (click)="loadCacheStats()" [disabled]="loading">
+          🔄 Actualizar Estadísticas
+        </button>
+      </div>
+      
+      <div class="stat-card">
+        <h3>📈 Frecuencia de Consultas</h3>
+        <div *ngIf="getFrequencyStatsCount() > 0; else noFrequencyData">
+          <div *ngFor="let stat of getObjectKeys(frequencyStats)" class="stat-item">
+            <strong>{{ stat }}</strong>: {{ frequencyStats[stat] }} consultas
+          </div>
+        </div>
+        <ng-template #noFrequencyData>
+          <p>No hay datos de frecuencia disponibles</p>
+        </ng-template>
       </div>
     </div>
+
+    <!-- Sección de Contenido de Cache -->
+    <div class="section">
+      <h3>🗂️ Contenido de Cache</h3>
+      <div class="cache-contents-card">
+        <p><strong>Mensaje:</strong> {{ cacheContents?.message }}</p>
+        <p><strong>Sugerencia:</strong> {{ cacheContents?.suggestion }}</p>
+        <div *ngIf="cacheContents?.cacheStats" class="cache-details">
+          <h4>Detalles de Cache:</h4>
+          <p><strong>Tamaño:</strong> {{ cacheContents.cacheStats.size }}</p>
+          <p><strong>Edad entrada más antigua:</strong> {{ cacheContents.cacheStats.oldestEntryAge }} segundos</p>
+        </div>
+        <button class="action-btn" (click)="loadCacheContents()" [disabled]="loading">
+          📋 Obtener Contenido
+        </button>
+      </div>
+    </div>
+
+    <!-- Sección de Gestión de Cache -->
+    <div class="section">
+      <h3>⚙️ Gestión de Cache</h3>
+      <div class="management-card">
+        <p>Puedes limpiar toda la cache manualmente si es necesario.</p>
+        <button class="action-btn clear-btn" (click)="clearCache()" [disabled]="loading">
+          🗑️ Limpiar Cache
+        </button>
+        <div *ngIf="clearCacheMessage" class="alert alert-success">
+          {{ clearCacheMessage }}
+        </div>
+        <div *ngIf="clearCacheError" class="alert alert-error">
+          {{ clearCacheError }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido de la pestaña de Learning -->
+  <div *ngIf="activeTab === 'learning'" class="tab-content">
+    <!-- Estadísticas de Aprendizaje -->
+    <div class="section">
+      <h3>📈 Estadísticas de Aprendizaje</h3>
+      <div class="stats-grid">
+        <div class="stat-card" *ngIf="learningStats">
+          <h4>Resumen General</h4>
+          <p><strong>Total consultas:</strong> {{ learningStats.totalQueries || 0 }}</p>
+          <p><strong>Consultas exitosas:</strong> {{ learningStats.successfulQueries || 0 }}</p>
+          <p><strong>Consultas fallidas:</strong> {{ learningStats.failedQueries || 0 }}</p>
+          <p><strong>Tasa de éxito:</strong> {{ learningStats.successRate || 0 | number:'1.2-2' }}%</p>
+          <p><strong>Intento más común:</strong> {{ learningStats.mostCommonIntent || 'N/A' }}</p>
+          <button class="action-btn" (click)="loadLearningStats()" [disabled]="loading">
+            🔄 Actualizar Stats
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consultas Populares -->
+    <div class="section">
+      <h3>🔥 Consultas Populares</h3>
+      <div class="controls">
+        <label>
+          Límite: 
+          <input type="number" [(ngModel)]="popularQueriesLimit" min="1" max="50" (change)="loadPopularQueries()">
+        </label>
+      </div>
+      <div class="queries-list">
+        <div *ngFor="let query of popularQueries; let i = index" class="query-item">
+          <div class="query-header">
+            <span class="query-rank">#{{ i + 1 }}</span>
+            <span class="query-intent" [class]="'intent-' + query.intent.toLowerCase()">
+              {{ query.intent }}
+            </span>
+            <span class="query-usage">
+              📊 {{ query.usageCount }} usos
+            </span>
+          </div>
+          <div class="query-text">{{ query.question }}</div>
+          <div class="query-meta">
+            <span class="query-timestamp">{{ query.timestamp | date:'medium' }}</span>
+            <span class="query-results" *ngIf="query.resultCount !== null && query.resultCount !== undefined">
+              📈 {{ query.resultCount }} resultados
+            </span>
+            <span class="query-time" *ngIf="query.executionTime">
+              ⏱ {{ query.executionTime | number:'1.2-2' }}s
+            </span>
+          </div>
+          <div class="query-sql" *ngIf="query.generatedSQL">
+            <details>
+              <summary>🔍 Ver SQL Generado</summary>
+              <code class="sql-code">{{ query.generatedSQL }}</code>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="popularQueries.length === 0" class="no-data">
+        No hay consultas populares disponibles
+      </div>
+    </div>
+
+    <!-- Consultas Recientes -->
+    <div class="section">
+      <h3>🕒 Consultas Recientes</h3>
+      <div class="controls">
+        <label>
+          Límite: 
+          <input type="number" [(ngModel)]="recentQueriesLimit" min="1" max="50" (change)="loadRecentQueries()">
+        </label>
+      </div>
+      <div class="queries-list">
+        <div *ngFor="let query of recentQueries; let i = index" class="query-item">
+          <div class="query-header">
+            <span class="query-rank">#{{ i + 1 }}</span>
+            <span class="query-intent" [class]="'intent-' + query.intent.toLowerCase()">
+              {{ query.intent }}
+            </span>
+          </div>
+          <div class="query-text">{{ query.question }}</div>
+          <div class="query-meta">
+            <span class="query-timestamp">{{ query.timestamp | date:'medium' }}</span>
+            <span class="query-results" *ngIf="query.resultCount !== null && query.resultCount !== undefined">
+              📈 {{ query.resultCount }} resultados
+            </span>
+            <span class="query-time" *ngIf="query.executionTime">
+              ⏱ {{ query.executionTime | number:'1.2-2' }}s
+            </span>
+          </div>
+          <div class="query-sql" *ngIf="query.generatedSQL">
+            <details>
+              <summary>🔍 Ver SQL Generado</summary>
+              <code class="sql-code">{{ query.generatedSQL }}</code>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="recentQueries.length === 0" class="no-data">
+        No hay consultas recientes disponibles
+      </div>
+    </div>
+
+    <!-- Consultas por Intención -->
+    <div class="section">
+      <h3>🎯 Consultas por Intención</h3>
+      <div class="controls">
+        <label>
+          Intención:
+          <select [(ngModel)]="selectedIntent" (change)="loadQueriesByIntent()">
+            <option value="SQL">SQL</option>
+            <option value="RAG">RAG</option>
+            <option value="WELCOME">WELCOME</option>
+          </select>
+        </label>
+        <label>
+          Límite:
+          <input type="number" [(ngModel)]="intentQueriesLimit" min="1" max="50" (change)="loadQueriesByIntent()">
+        </label>
+      </div>
+      <div class="queries-list">
+        <div *ngFor="let query of queriesByIntent; let i = index" class="query-item">
+          <div class="query-header">
+            <span class="query-rank">#{{ i + 1 }}</span>
+            <span class="query-usage">
+              📊 {{ query.usageCount }} usos
+            </span>
+          </div>
+          <div class="query-text">{{ query.question }}</div>
+          <div class="query-meta">
+            <span class="query-timestamp">{{ query.timestamp | date:'medium' }}</span>
+            <span class="query-results" *ngIf="query.resultCount !== null && query.resultCount !== undefined">
+              📈 {{ query.resultCount }} resultados
+            </span>
+            <span class="query-time" *ngIf="query.executionTime">
+              ⏱ {{ query.executionTime | number:'1.2-2' }}s
+            </span>
+          </div>
+          <div class="query-sql" *ngIf="query.generatedSQL">
+            <details>
+              <summary>🔍 Ver SQL Generado</summary>
+              <code class="sql-code">{{ query.generatedSQL }}</code>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="queriesByIntent.length === 0" class="no-data">
+        No hay consultas para esta intención
+      </div>
+    </div>
+
+    <!-- Todas las Consultas -->
+    <div class="section">
+      <h3>📋 Todas las Consultas Aprendidas</h3>
+      <button class="action-btn" (click)="loadAllQueries()" [disabled]="loading">
+        📥 Cargar Todas las Consultas
+      </button>
+      <div class="queries-list">
+        <div *ngFor="let query of allQueries; let i = index" class="query-item">
+          <div class="query-header">
+            <span class="query-number">#{{ i + 1 }}</span>
+            <span class="query-intent" [class]="'intent-' + query.intent.toLowerCase()">
+              {{ query.intent }}
+            </span>
+            <span class="query-usage">
+              📊 {{ query.usageCount }} usos
+            </span>
+          </div>
+          <div class="query-text">{{ query.question }}</div>
+          <div class="query-meta">
+            <span class="query-timestamp">{{ query.timestamp | date:'medium' }}</span>
+            <span class="query-results" *ngIf="query.resultCount !== null && query.resultCount !== undefined">
+              📈 {{ query.resultCount }} resultados
+            </span>
+            <span class="query-time" *ngIf="query.executionTime">
+              ⏱ {{ query.executionTime | number:'1.2-2' }}s
+            </span>
+          </div>
+          <div class="query-sql" *ngIf="query.generatedSQL">
+            <details>
+              <summary>🔍 Ver SQL Generado</summary>
+              <code class="sql-code">{{ query.generatedSQL }}</code>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="allQueries.length === 0" class="no-data">
+        No hay consultas almacenadas
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones de acción globales -->
+  <div class="action-buttons">
+    <button class="action-btn primary-btn" (click)="loadAllData()" [disabled]="loading">
+      🔄 Recargar Todos los Datos
+    </button>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading-indicator">
+    <div class="spinner"></div>
+    <span>Cargando datos...</span>
   </div>
 </div>
