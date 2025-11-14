@@ -12,7 +12,7 @@ export class RagService {
   constructor(private http: HttpClient) { }
 
   sendQuery(question: string): Observable<UnifiedQueryResult> {
-    return this.http.post<UnifiedQueryResult>(`${this.apiUrl}/chat`, { question });
+    return this.http.post<UnifiedQueryResult>(`${this.apiUrl}/ask-enhanced`, { question });
   }
 
   getRanking(): Observable<RankingDTO[]> {

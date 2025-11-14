@@ -17,10 +17,10 @@ export class QaApiService {
   constructor(private http: HttpClient) {}
 
     sendMessage(message: string): Observable<any> {
-      console.log('📨 Servicio - Enviando mensaje a:', `${this.apiUrl}/chat`);
+      console.log('📨 Servicio - Enviando mensaje a:', `${this.apiUrl}/ask-enhanced`);
       console.log('📝 Mensaje:', message);
 
-      return this.http.post(`${this.apiUrl}/chat`, { question: message }).pipe(
+      return this.http.post(`${this.apiUrl}/ask-enhanced`, { question: message }).pipe(
         tap(() => {
           //console.log('✅ Respuesta del servidor:', response);
         }),
@@ -54,12 +54,12 @@ export class QaApiService {
 
   // ← AÑADIDO: Método para verificar estado del servidor
   checkServerStatus(): Observable<any> {
-    // Intentar con el endpoint /health primero, si falla probar con /chat
+    // Intentar con el endpoint /health primero, si falla probar con /ask-enhanced
     return this.http.get(`${this.apiUrl}/ranking-test`).pipe(
       catchError(() => {
-        console.log('⚠️ Endpoint /health no disponible, probando con /chat...');
-        // Si no hay endpoint health, probamos con una llamada GET a /chat
-        return this.http.get(`${this.apiUrl}/chat`).pipe(
+        console.log('⚠️ Endpoint /health no disponible, probando con /ask-enhanced...');
+        // Si no hay endpoint health, probamos con una llamada GET a /ask-enhanced
+        return this.http.get(`${this.apiUrl}/ask-enhanced`).pipe(
           catchError(() => {
             // Si ambos fallan, el servidor no está disponible
             return throwError(() => 'Servidor no disponible');
