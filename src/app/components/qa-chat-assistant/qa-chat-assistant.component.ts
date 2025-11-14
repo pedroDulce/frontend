@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { QaApiService } from '../../services/qa-api.service';
 import { UnifiedQueryResult, ChatMessage, QuestionRequest } from '../../models/chat.model';
 import { MonitoringComponent } from '../monitoring/monitoring.component';
+import { RankingComponent } from "../ranking/ranking.component";
 
 @Component({
   selector: 'app-qa-chat-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule, MonitoringComponent],
+  imports: [CommonModule, FormsModule, MonitoringComponent, RankingComponent],
   templateUrl: './qa-chat-assistant.component.html',
   styleUrls: ['./qa-chat-assistant.component.css']
 })
@@ -24,12 +25,10 @@ export class QaChatAssistantComponent implements OnInit {
   constructor(private qaService: QaApiService) {}
   
   showMonitoring() {
-    console.log('Cambiando a vista: show MonitoringView TRUE')
     this.showMonitoringView = true;
   }
 
   showHome() {
-    console.log('Cambiando a vista: show HOME TRUE');
     this.showMonitoringView = false;
   }
 

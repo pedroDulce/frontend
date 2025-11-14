@@ -10,6 +10,11 @@
     </button>
   </div>
 
+    <div class="content-area">
+      <app-ranking></app-ranking>
+    </div>
+  
+
   <div class="chat-content" *ngIf="!isCollapsed">
     <!-- Mensaje de sistema si el servidor está caído -->
     <div class="system-alert" *ngIf="!serverAvailable">

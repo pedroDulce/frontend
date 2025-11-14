@@ -14,11 +14,22 @@ export class RankingComponent implements OnInit {
   ranking: RankingDTO[] = [];
   loading = true;
   error = '';
+  showMonitoringView: boolean = false;
 
   constructor(private qaApi: QaApiService) {}
 
   ngOnInit() {
     this.loadRanking();
+  }
+
+  showMonitoring() {
+    console.log('Cambiando a vista: show MonitoringView TRUE')
+    this.showMonitoringView = true;
+  }
+
+  showHome() {
+    console.log('Cambiando a vista: show HOME TRUE');
+    this.showMonitoringView = false;
   }
 
   loadRanking() {
