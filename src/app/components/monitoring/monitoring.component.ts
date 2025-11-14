@@ -19,22 +19,23 @@ export class MonitoringComponent implements OnInit {
       "¿Cómo usar RxJS?": 32,
       "¿Qué es TypeScript?": 28
     };
-  private apiUrl = 'http://localhost:8080/api/qa-assistant';
+  private apiUrl = 'http://localhost:8080/api/cache';
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
+    console.log(('iniciando monitorización...'));
     this.loadStats();
   }
 
   loadStats() {
-    /*this.http.get(`${this.apiUrl}/api/cache/stats`).subscribe(stats => {
+    this.http.get(`${this.apiUrl}/stats`).subscribe(stats => {
       this.cacheStats = stats;
     });
     
-    this.http.get(`${this.apiUrl}/api/cache/frequent-queries/7`).subscribe(stats => {
+    this.http.get(`${this.apiUrl}/frequent-queries/7`).subscribe(stats => {
       this.frequencyStats = stats;
-    });*/
+    });
   }
 
   refreshStats() {
