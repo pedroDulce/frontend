@@ -1,37 +1,3 @@
-// Versión simplificada - solo lo esencial
-export interface UnifiedQueryResult {
-  originalQuestion: string;
-  intent: 'SQL' | 'RAG';
-  suggestions?: string[];
-  answer: string;
-  generatedSQL?: string;
-  rawResults?: any[];
-  sources?: KnowledgeDocument[];
-  success: boolean;
-  errorMessage?: string;
-}
-
-export interface KnowledgeDocument {
-  id: string;
-  content: string;
-  score?: number;
-}
-
-export interface QuestionRequest {
-  question: string;
-}
-
-
-export interface ChatMessage {
-  content: string;
-  text: string;
-  type: 'user' | 'assistant' | 'error';
-  timestamp: Date;
-  suggestions?: string[];
-  sources?: SourceDTO[];
-  isError?: boolean;
-  response?: UnifiedQueryResult;
-}
 
 
 export interface SourceDTO {
@@ -54,4 +20,51 @@ export interface RankingDTO {
   estado?: string;
   fechaCreacion?: Date; 
   cobertura: number;   
+}
+
+// models.ts
+export interface UnifiedQueryResult {
+  originalQuestion: string;
+  intent: 'SQL' | 'RAG' | 'WELCOME';  // Añadir WELCOME
+  suggestions?: string[];
+  answer: string;
+  generatedSQL?: string;
+  rawResults?: any[];
+  sources?: KnowledgeDocument[];  // Cambiar de SourceDTO a KnowledgeDocument
+  success: boolean;
+  errorMessage?: string;
+}
+
+export interface KnowledgeDocument {
+  id: string;
+  content: string;
+  metadata?: DocumentMetadata;
+  score?: number;
+  source?: string;
+}
+
+// Añade esta interfaz que falta
+export interface DocumentMetadata {
+  title?: string;
+  author?: string;
+  createdDate?: string;
+  lastModified?: string;
+  documentType?: string;
+  tags?: string[];
+  sourceFile?: string;
+  pageNumber?: number;
+}
+
+
+export interface ChatMessage {
+  text: string;
+  type: 'user' | 'assistant' | 'system';
+  timestamp: Date;
+  isError?: boolean;
+  suggestions?: string[];
+  response?: UnifiedQueryResult;
+}
+
+export interface QuestionRequest {
+  question: string;
 }

@@ -38,28 +38,29 @@
         
         <div class="message-content">
           <!-- Mostrar pregunta original -->
-          <div class="original-question" *ngIf="msg.response?.originalQuestion">
+          <div class="original-question" *ngIf="msg.response && msg.response.originalQuestion">
             <strong>Pregunta:</strong> {{ msg.response.originalQuestion }}
           </div>
 
           <!-- Indicador de tipo de respuesta -->
-          <div class="intent-badge" [class.intent-sql]="msg.response?.intent === 'SQL'" 
-                                  [class.intent-rag]="msg.response?.intent === 'RAG'">
-            {{ msg.response?.intent === 'SQL' ? '📊 CONSULTA SQL' : '📚 BÚSQUEDA DOCUMENTAL' }}
+          <div class="intent-badge" 
+               *ngIf="msg.response && msg.response.intent !== 'WELCOME'"
+               [class.intent-sql]="msg.response.intent === 'SQL'" 
+               [class.intent-rag]="msg.response.intent === 'RAG'">
+            {{ msg.response.intent === 'SQL' ? '📊 CONSULTA SQL' : '📚 BÚSQUEDA DOCUMENTAL' }}
           </div>
 
           <!-- Respuesta principal -->
-          <div class="message-text" *ngIf="msg.response?.intent !== 'SQL'" 
-            [innerHTML]="msg.text"></div>
+          <div class="message-text" [innerHTML]="msg.text"></div>
           
-          <!-- SQL Generado (solo para intent SQL) -->
-          <div class="sql-section" *ngIf="msg.response?.generatedSQL">
+          <!-- SQL Generado -->
+          <div class="sql-section" *ngIf="msg.response && msg.response.generatedSQL">
             <div class="section-title">🔍 SQL Generado:</div>
             <code class="sql-code">{{ msg.response.generatedSQL }}</code>
           </div>
 
-          <!-- Resultados en tabla (solo para intent SQL) -->
-          <div class="results-section" *ngIf="msg.response?.rawResults && msg.response.rawResults.length > 0">
+          <!-- Resultados en tabla -->
+          <div class="results-section" *ngIf="msg.response && msg.response.rawResults && msg.response.rawResults.length > 0">
             <div class="section-title">📋 Resultados ({{ msg.response.rawResults.length }} registros):</div>
             <div class="table-container">
               <table class="results-table">
@@ -79,8 +80,8 @@
             </div>
           </div>
 
-          <!-- Fuentes de información (solo para intent RAG) -->
-          <div class="sources-section" *ngIf="msg.response?.sources && msg.response.sources.length > 0">
+          <!-- Fuentes de información -->
+          <div class="sources-section" *ngIf="msg.response && msg.response.sources && msg.response.sources.length > 0">
             <div class="section-title">📚 Fuentes consultadas:</div>
             <div class="sources-list">
               <div *ngFor="let source of msg.response.sources; let i = index" class="source-item">
@@ -96,41 +97,32 @@
 
           <!-- Estado de la operación -->
           <div class="status-section" 
-              [class.status-success]="msg.response?.success && !loading" 
-              [class.status-error]="(!msg.response?.success && !loading) || (loading && msg.isError)"
-              [class.status-loading]="loading && !msg.response">
-            
-            <!-- Estado de carga -->
-            <div *ngIf="loading && !msg.response" class="loading-status">
-              <span class="status-icon">⏳</span>
-              <span class="status-text">Procesando tu consulta...</span>
-              <div class="loading-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-
-            <!-- Estado normal (éxito/error) 
-            <div *ngIf="!loading || msg.response">
-              <span class="status-icon">
-                <span *ngIf="msg.response?.success && !loading">✅</span>
-                <span *ngIf="!msg.response?.success && !loading">❌</span>
-              </span>
-              <span class="status-text">
-                <span *ngIf="msg.response?.success && !loading">
-                  {{ msg.response?.intent === 'WELCOME' ? 'Listo' : 'Consulta procesada exitosamente' }}
-                </span>
-                <span *ngIf="!msg.response?.success && !loading">Error en la consulta</span>
-              </span>
-              <span class="error-message" *ngIf="msg.response?.errorMessage && !loading">
-                {{ msg.response.errorMessage }}
-              </span>
-            </div>
+               *ngIf="msg.response && msg.response.intent !== 'WELCOME'"
+               [class.status-success]="msg.response.success" 
+               [class.status-error]="!msg.response.success">
+            <span class="status-icon">{{ msg.response.success ? '✅' : '❌' }}</span>
+            <span class="status-text">
+              {{ msg.response.success ? 'Consulta procesada exitosamente' : 'Error en la consulta' }}
+            </span>
+            <span class="error-message" *ngIf="msg.response.errorMessage">
+              {{ msg.response.errorMessage }}
+            </span>
           </div>
-          -->
 
           <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+
+          <!-- Sugerencias -->
+          <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0">
+            <div class="suggestions-label">Sugerencias:</div>
+            <div class="suggestions-grid">
+              <button *ngFor="let suggestion of msg.suggestions" 
+                      class="suggestion-btn-modern"
+                      (click)="useSuggestion(suggestion); $event.stopPropagation()"
+                      [disabled]="loading">
+                {{ suggestion }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -141,7 +133,7 @@
           <span></span>
           <span></span>
         </div>
-        <span>Conectando con el servidor...</span>
+        <span>Procesando tu consulta...</span>
       </div>
     </div>
 

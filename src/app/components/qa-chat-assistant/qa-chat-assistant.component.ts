@@ -2,16 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QaApiService } from '../../services/qa-api.service';
-import { UnifiedQueryResult, SourceDTO } from '../../models/chat.model';
-
-// Interface corregida con SourceDTO
-interface QAMessage {
-  text: string;
-  type: 'user' | 'assistant';
-  timestamp: Date;
-  suggestions?: string[];
-  sources?: SourceDTO[];  // ← Usar SourceDTO importado
-}
+import { UnifiedQueryResult, ChatMessage, QuestionRequest } from '../../models/chat.model';
 
 @Component({
   selector: 'app-qa-chat-assistant',
@@ -20,54 +11,46 @@ interface QAMessage {
   templateUrl: './qa-chat-assistant.component.html',
   styleUrls: ['./qa-chat-assistant.component.css']
 })
-
-
 export class QaChatAssistantComponent implements OnInit {
-  messages: any[] = [];
+  messages: ChatMessage[] = [];
   loading = false;
   userInput = '';
-  isCollapsed = false; // ← AÑADIDO
+  isCollapsed = false;
   serverAvailable = true;
-  private isProcessing = false;
 
   constructor(private qaService: QaApiService) {}
 
   ngOnInit() {
     this.checkServerConnection();
-    // Mensaje de bienvenida inicial
     this.addWelcomeMessage();
   }
 
-  // ← AÑADIDO: Método para alternar chat
   toggleChat() {
     this.isCollapsed = !this.isCollapsed;
-    //console.log('💬 Chat ' + (this.isCollapsed ? 'minimizado' : 'expandido'));
   }
 
-  // ← AÑADIDO: Método para trackBy
-  trackByFn(index: number, item: any): any {
-    return item.timestamp + index; // Identificador único
+  trackByFn(index: number, item: ChatMessage): string {
+    return `${item.timestamp.getTime()}-${index}`;
   }
 
-  // Mensaje de bienvenida
   private addWelcomeMessage() {
-    const welcomeMessage = {
+    const welcomeMessage: ChatMessage = {
       text: '¡Hola! Soy tu asistente de QA. ¿En qué puedo ayudarte?',
       type: 'assistant',
       timestamp: new Date(),
-      suggestions: [
-        '¿Qué entidades principales tiene el sistema?',
-        '¿Cómo se calcula el ranking de cobertura?',
-        'Explicarme el modelo de datos',
-        '¿Qué tipos de pruebas se realizan?'
-      ],
       isError: false,
+      suggestions: [
+        'Listar todas las actividades',
+        'Mostrar actividades completadas',
+        'Consultar progreso por aplicación',
+        'Explicar el proceso de testing'
+      ],
       response: {
-        success: true,
+        originalQuestion: '',
         intent: 'WELCOME',
         answer: '¡Hola! Soy tu asistente de QA. ¿En qué puedo ayudarte?',
-        originalQuestion: ''
-      } as unknown as UnifiedQueryResult
+        success: true
+      }
     };
     this.messages = [welcomeMessage];
   }
@@ -75,29 +58,23 @@ export class QaChatAssistantComponent implements OnInit {
   checkServerConnection() {
     this.qaService.checkServerStatus().subscribe({
       next: () => {
-        console.log('✅ Servidor conectado');
-        alert('✅ Servidor conectado');
         this.serverAvailable = true;
       },
       error: () => {
-        console.error('❌ Servidor no disponible');
-        alert('❌ Servidor no disponible');
         this.serverAvailable = false;
         this.addSystemMessage('El servidor no está disponible. Verifica que el backend esté ejecutándose.');
       }
     });
   }
 
-
   sendMessage() {
-    if (this.isProcessing || this.loading || !this.userInput.trim()) {
+    if (this.loading || !this.userInput.trim() || !this.serverAvailable) {
       return;
     }
 
-    this.isProcessing = true;
     this.loading = true;
 
-    const userMessage = {
+    const userMessage: ChatMessage = {
       text: this.userInput,
       type: 'user',
       timestamp: new Date()
@@ -107,58 +84,39 @@ export class QaChatAssistantComponent implements OnInit {
     const currentInput = this.userInput;
     this.userInput = '';
 
-    console.log('🔍 Enviando mensaje:', currentInput);
-
     this.qaService.sendMessage(currentInput).subscribe({
       next: (response: UnifiedQueryResult) => {
-        console.log('✅ Respuesta procesada correctamente:', response);
-        
-        const assistantMessage = {
+        const assistantMessage: ChatMessage = {
           text: response.answer,
           type: 'assistant',
           timestamp: new Date(),
           suggestions: response.suggestions || [],
-          sources: response.sources || [],
-          success: response.success,
-          isError: !response.success, 
-          response: response // Este objeto tiene success: true
+          isError: !response.success,
+          response: response // Los sources vienen dentro de response
         };
 
         this.messages = [...this.messages, assistantMessage];
-        this.resetLoadingState();
+        this.loading = false;
       },
       error: (error: any) => {
-        console.error('💥 Error en la comunicación:', {
-          userMessage: error.userMessage,
-          technicalError: error.technicalError
-        });
-        
-        const errorMessage = {
+        const errorMessage: ChatMessage = {
           text: error.userMessage || 'Error de conexión con el servidor.',
           type: 'assistant',
           timestamp: new Date(),
           suggestions: ['Reintentar', 'Verificar conexión'],
-          success: false,
           isError: true          
         };
 
         this.messages = [...this.messages, errorMessage];
-        this.resetLoadingState();
-      },
-      complete: () => {
-        console.log('🏁 Petición completada');
+        this.loading = false;
       }
     });
   }
 
-
   useSuggestion(suggestion: string) {
-    if (this.isProcessing || this.loading) {
-      return;
-    }
+    if (this.loading) return;
 
     if (suggestion === 'Reintentar' && this.messages.length > 0) {
-      // Reintentar el último mensaje del usuario
       const lastUserMessage = this.messages
         .filter(msg => msg.type === 'user')
         .pop();
@@ -179,18 +137,8 @@ export class QaChatAssistantComponent implements OnInit {
     setTimeout(() => this.sendMessage(), 100);
   }
 
-  // ← AÑADIDO: Sugerencias por defecto
-  private getDefaultSuggestions(): string[] {
-    return [
-      '¿Qué entidades principales tiene el sistema?',
-      '¿Cómo se calcula el ranking de cobertura?',
-      'Explicarme el modelo de datos',
-      '¿Qué tipos de pruebas se realizan?'
-    ];
-  }
-
   private addSystemMessage(text: string) {
-    const systemMessage = {
+    const systemMessage: ChatMessage = {
       text: text,
       type: 'system',
       timestamp: new Date()
@@ -198,27 +146,11 @@ export class QaChatAssistantComponent implements OnInit {
     this.messages = [...this.messages, systemMessage];
   }
 
-  private resetLoadingState() {
-    this.loading = false;
-    this.isProcessing = false;
-    //console.log('🔄 Estado resetado');
-  }
-
-  // ← AÑADIDO: Método clearChat completo
   clearChat() {
     this.messages = [];
     this.userInput = '';
-    this.resetLoadingState();
-    // Añadir mensaje de bienvenida después de limpiar
+    this.loading = false;
     setTimeout(() => this.addWelcomeMessage(), 100);
-  }
-
-  // ← AÑADIDO: Método para mostrar fuentes (si lo necesitas)
-  getSourceDisplay(source: any): string {
-    if (typeof source === 'string') {
-      return source;
-    }
-    return source?.name || source?.title || 'Fuente desconocida';
   }
 
   getTableColumns(results: any[]): string[] {
@@ -227,15 +159,8 @@ export class QaChatAssistantComponent implements OnInit {
   }
 
   formatTableCell(value: any): string {
-    if (value === null || value === undefined) {
-      return 'NULL';
-    }
-    
-    if (typeof value === 'object') {
-      return JSON.stringify(value);
-    }
-    
+    if (value === null || value === undefined) return 'NULL';
+    if (typeof value === 'object') return JSON.stringify(value);
     return value.toString();
   }
-
 }
