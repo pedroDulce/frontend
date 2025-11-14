@@ -416,3 +416,20 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.footer {
+  margin-top: 2rem;
+  padding: 1rem;
+  text-align: center;
+  border-top: 1px solid #eee;
+}
+
+.monitoring-link {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.monitoring-link:hover {
+  color: #007bff;
+}

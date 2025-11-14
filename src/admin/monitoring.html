@@ -1,0 +1,114 @@
+<!-- monitoring.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monitor del Sistema QA</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .panel { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .cache-panel { background: #e3f2fd; }
+        .learning-panel { background: #f3e5f5; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        .stat-card { background: white; padding: 10px; border-radius: 5px; text-align: center; }
+        .hit { color: green; font-weight: bold; }
+        .miss { color: red; }
+    </style>
+</head>
+<body>
+    <h1>📊 Monitor del Sistema QA Assistant</h1>
+    
+    <div class="panel cache-panel">
+        <h2>🎯 Cache del Sistema</h2>
+        <div id="cache-stats" class="stats-grid">
+            <!-- Se llena con JavaScript -->
+        </div>
+        <button onclick="refreshCacheStats()">🔄 Actualizar Cache</button>
+    </div>
+    
+    <div class="panel learning-panel">
+        <h2>🎓 Sistema de Aprendizaje</h2>
+        <div id="learning-stats" class="stats-grid">
+            <!-- Se llena con JavaScript -->
+        </div>
+        <button onclick="refreshLearningStats()">🔄 Actualizar Aprendizaje</button>
+    </div>
+
+    <script>
+        async function refreshCacheStats() {
+            try {
+                const response = await fetch('/api/debug/cache/stats');
+                const stats = await response.json();
+                displayCacheStats(stats);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function refreshLearningStats() {
+            try {
+                const response = await fetch('/api/debug/learning/stats');
+                const stats = await response.json();
+                displayLearningStats(stats);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function displayCacheStats(stats) {
+            const container = document.getElementById('cache-stats');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value ${stats.hitRate > 50 ? 'hit' : 'miss'}">${stats.hitRate.toFixed(1)}%</div>
+                    <div class="stat-label">Tasa de Aciertos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.hits}</div>
+                    <div class="stat-label">Cache Hits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.misses}</div>
+                    <div class="stat-label">Cache Misses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.stores}</div>
+                    <div class="stat-label">Almacenados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.currentSize}</div>
+                    <div class="stat-label">Tamaño Actual</div>
+                </div>
+            `;
+        }
+        
+        function displayLearningStats(stats) {
+            const container = document.getElementById('learning-stats');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalQueriesLearned}</div>
+                    <div class="stat-label">Consultas Aprendidas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalUsageCount}</div>
+                    <div class="stat-label">Usos Totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.knowledgeBaseAdditions}</div>
+                    <div class="stat-label">Agregados al RAG</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.averageUsagePerQuery.toFixed(1)}</div>
+                    <div class="stat-label">Uso Promedio</div>
+                </div>
+            `;
+        }
+        
+        // Actualizar automáticamente cada 5 segundos
+        setInterval(refreshCacheStats, 5000);
+        setInterval(refreshLearningStats, 5000);
+        
+        // Cargar datos iniciales
+        refreshCacheStats();
+        refreshLearningStats();
+    </script>
+</body>
+</html>

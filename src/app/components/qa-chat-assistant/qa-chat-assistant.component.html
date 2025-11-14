@@ -1,5 +1,5 @@
 <!-- qa-chat-assistant.component.html -->
-<div class="chat-widget" [class.collapsed]="isCollapsed">
+<div class="chat-widget" [class.collapsed]="isCollapsed" *ngIf="!showMonitoringView">
   <div class="chat-header" (click)="toggleChat()">
     <h3>💬 QA Assistant</h3>
     <div class="server-status" [class.online]="serverAvailable" [class.offline]="!serverAvailable">
@@ -170,5 +170,19 @@
         </button>
       </div>
     </div>
+
+    <footer class="footer">
+        <a (click)="showMonitoring()" class="monitoring-link" style="cursor: pointer;">
+          📊 Sistema de Monitoreo
+        </a>
+      </footer>
   </div>
-</div>
+
+  <div *ngIf="showMonitoringView">
+    <app-monitoring></app-monitoring>
+    <footer class="footer">
+      <a (click)="showHome()" class="monitoring-link" style="cursor: pointer;">
+        ← Volver al Inicio
+      </a>
+    </footer>
+  </div>

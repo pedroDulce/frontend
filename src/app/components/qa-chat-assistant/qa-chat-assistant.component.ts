@@ -3,22 +3,33 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QaApiService } from '../../services/qa-api.service';
 import { UnifiedQueryResult, ChatMessage, QuestionRequest } from '../../models/chat.model';
+import { MonitoringComponent } from '../monitoring/monitoring.component';
 
 @Component({
   selector: 'app-qa-chat-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MonitoringComponent],
   templateUrl: './qa-chat-assistant.component.html',
   styleUrls: ['./qa-chat-assistant.component.css']
 })
 export class QaChatAssistantComponent implements OnInit {
+[x: string]: any;
   messages: ChatMessage[] = [];
   loading = false;
   userInput = '';
   isCollapsed = false;
-  serverAvailable = true;
+  serverAvailable = true;  
+  showMonitoringView: boolean = false;
 
   constructor(private qaService: QaApiService) {}
+  
+  showMonitoring() {
+    this.showMonitoringView = true;
+  }
+
+  showHome() {
+    this.showMonitoringView = false;
+  }
 
   ngOnInit() {
     this.checkServerConnection();
