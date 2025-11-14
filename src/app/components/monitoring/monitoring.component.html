@@ -9,13 +9,10 @@
     </div>
     
     <div class="stat-card">
-      <h3>Frecuencia de Consultas (Últimos 7 días)</h3>
+      <h3>Frecuencia de Consultas</h3>
       <div *ngFor="let stat of frequencyStats | keyvalue" class="stat-item">
         <strong>{{ stat.key }}</strong>: {{ stat.value }} consultas
       </div>
     </div>
   </div>
-
-  <button (click)="refreshStats()" class="refresh-btn">Actualizar</button>
-  <button routerLink="/" class="back-btn">Volver al Inicio</button>
 </div>

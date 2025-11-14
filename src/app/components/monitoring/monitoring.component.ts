@@ -10,8 +10,15 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./monitoring.component.css']
 })
 export class MonitoringComponent implements OnInit {
-  cacheStats: any = {};
-  frequencyStats: any = {};
+  cacheStats: any = {
+      size: 150,
+      oldestEntryAge: 3600
+    };;
+  frequencyStats: any = {
+      "¿Qué es Angular?": 45,
+      "¿Cómo usar RxJS?": 32,
+      "¿Qué es TypeScript?": 28
+    };
   private apiUrl = 'http://localhost:8080/api/qa-assistant';
 
   constructor(private http: HttpClient) {}
@@ -21,16 +28,17 @@ export class MonitoringComponent implements OnInit {
   }
 
   loadStats() {
-    this.http.get(`${this.apiUrl}/api/cache/stats`).subscribe(stats => {
+    /*this.http.get(`${this.apiUrl}/api/cache/stats`).subscribe(stats => {
       this.cacheStats = stats;
     });
     
     this.http.get(`${this.apiUrl}/api/cache/frequent-queries/7`).subscribe(stats => {
       this.frequencyStats = stats;
-    });
+    });*/
   }
 
   refreshStats() {
     this.loadStats();
   }
+
 }

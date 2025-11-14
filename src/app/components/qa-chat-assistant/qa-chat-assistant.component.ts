@@ -24,10 +24,12 @@ export class QaChatAssistantComponent implements OnInit {
   constructor(private qaService: QaApiService) {}
   
   showMonitoring() {
+    console.log('Cambiando a vista: show MonitoringView TRUE')
     this.showMonitoringView = true;
   }
 
   showHome() {
+    console.log('Cambiando a vista: show HOME TRUE');
     this.showMonitoringView = false;
   }
 

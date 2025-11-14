@@ -177,12 +177,13 @@
         </a>
       </footer>
   </div>
+</div>
 
-  <div *ngIf="showMonitoringView">
-    <app-monitoring></app-monitoring>
-    <footer class="footer">
-      <a (click)="showHome()" class="monitoring-link" style="cursor: pointer;">
-        ← Volver al Inicio
-      </a>
-    </footer>
-  </div>
+<div *ngIf="showMonitoringView">
+  <app-monitoring></app-monitoring>
+  <footer class="footer">
+    <a (click)="showHome()" class="monitoring-link" style="cursor: pointer;">
+      ← Volver a la Home
+    </a>
+  </footer>
+</div>
