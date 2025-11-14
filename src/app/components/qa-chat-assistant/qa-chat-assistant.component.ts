@@ -84,7 +84,7 @@ export class QaChatAssistantComponent implements OnInit {
     const currentInput = this.userInput;
     this.userInput = '';
 
-    this.qaService.sendMessage(currentInput).subscribe({
+    this.qaService.askQuestion(currentInput).subscribe({
       next: (response: UnifiedQueryResult) => {
         const assistantMessage: ChatMessage = {
           text: response.answer,
