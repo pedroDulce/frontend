@@ -87,7 +87,6 @@ export class MonitoringComponent implements OnInit {
     this.loading = true;    
     this.http.get(`${this.apiCacheMonitorUrl}/stats`).subscribe({
       next: (stats: any) => {
-        console.log('stats: ', stats)
         this.cacheStats = stats;
         this.loading = false;
       },
